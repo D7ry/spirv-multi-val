@@ -62,7 +62,7 @@ Without the tools introduced by this project, a typical SPIR-V workflow involves
 
 If step (3) produces one error, the programmer must go back to step (1) and go over the entire loop again, jumping between multiple interfaces and inputting repetitive commands.
 
-It would best serve low-level graphics and compute programmers, and compiler engineers' interests, to have a real-time LSP for hand-writing SPIR-V code. Before discussing the implementation, we first examine the official toolings provided by the Khronos Group and the potential challenges engineers face when using them.
+It would best serve low-level graphics and compute programmers, and compiler engineers' interests, to have a real-time LSP for hand-writing SPIR-V code. 
 
 ## Design
 
