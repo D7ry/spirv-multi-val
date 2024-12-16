@@ -1,8 +1,7 @@
 # SPIR-V Multi Validate and LSP
 
 We extended the existing SPIR-V language tooling to allow for exhaustively checking multiple errors
-in a compilation unit. We integrated such multi-error checking into a C-API, opening up
-possibilities for a semantic LSP similar to clang, for SPIR-V language.
+in a compilation unit. We integrated such multi-error checking into a C-API. We also developed a simple vscode frontend plugin that interops with the new feature, as a proof-of-concept for a full-fledged LSP for SPIR-V language similar to clangd.
 
 <figure>
   <img
@@ -86,6 +85,8 @@ The new features introduced should greatly improve SPIR-V tooling in terms of co
 
 ## Implementation
 
+We implement the design in a  [custom fork of official SPIRV-Tools](https://github.com/D7ry/SPIRV-Tools), and a [vscode extension](https://github.com/D7ry/spirv-val-vsc).
+
 ### Diagnostic Struct
 
 `spirv-val` and `spirv-val` use `spv_diagnostic_t` struct to store a single diagnostic -- including line numbers and detailed text message. All functions revolving streaming, dumping, and printing diagnostics revolve around this struct -- with 900+ references. Therefore it is less practical to vectorize the struct. Instead we add a pointer field that points to a potential next `spv_diagnostic_t` struct, making the struct a linked list. Such an implementation is minimally intrusive. 
@@ -135,14 +136,65 @@ We implemented a typescript frontend to communicate results from `spirv-val`, `s
     - if the assembler errors, the frontend would directly show the errored line.
 2. Invoke `spirv-val` on the temporary binrary, parse the results, and display errored lines and messages through vscode.
 
-## Evaluation
+## Results & Evaluation
 
+### spirv-val Binary
+
+With the modifications, the `spirv-val` binary now exhaustively examines and emits all semantic errors:
+
+
+<figure>
+  <img
+  src="images/spirv_val_output_modified.png"
+  alt="The beautiful MDN logo.">
+  <figcaption>
+      <h4 align="center">
+      All Errors In One Invocation
+      </h4>
+  </figcaption>
+</figure>
+
+
+### Vscode Plugin
+
+The VSCode plugin automatically re-invokes the validation process on file save, and shows inline diagnostic results, which the programmer can easily preview by hovering:
+
+
+<figure>
+  <img
+  src="images/dynamic_validator.gif"
+  alt="The beautiful MDN logo.">
+  <figcaption>
+      <h4 align="center">
+      Dynamic Error Display
+      </h4>
+  </figcaption>
+</figure>
+
+The errors displayed may be either emitted by `spirv-as` -- if there exists a syntax error before assembling into binary, or `spirv-val` for all semantic errors:
+
+
+<figure>
+  <img
+  src="images/syntax_and_semantic.gif"
+  alt="The beautiful MDN logo.">
+  <figcaption>
+      <h4 align="center">
+      Syntax and Semantic Errors
+      </h4>
+  </figcaption>
+</figure>
 
 ## Future Work
 
+We intend to publish the vscode extension to be publically usable by all SPIR-V programmers. Before that, however, the changes to `spirv-val` must be merged into Khronos Group's official branch.
+
+We also seek to expand the plugin into a full-fledged LSP similar to clangd. This (1) eliminates the need for a vscode frontend and (2) provides compatibility across all IDEs. Existing tools such as 
+[spirv-viewer](https://github.com/daiyousei-qz/spirv-viewer) already provides hover documentation functionalities, and code suggestion can be added with context from spirv-as and spirv-val. This goal however may require more extensive refactorings of `SPIRV-Tools`.
 
 ## Summary
 
+In this project, we enhanced the SPIR-V tooling ecosystem by enabling exhaustive error checking in `spirv-val` and integrating it into a VSCode extension. This allows developers to receive real-time feedback on both syntactic and semantic errors while editing SPIR-V code, significantly improving the development workflow. Future work includes merging these changes into the official SPIRV-Tools repository and expanding the extension into a full-fledged LSP for broader IDE compatibility.
 
 ## References
 
@@ -151,4 +203,5 @@ We implemented a typescript frontend to communicate results from `spirv-val`, `s
 [glslang](https://github.com/KhronosGroup/glslang)  
 [SPIRV-Tools](https://github.com/KhronosGroup/SPIRV-Tools)  
 [spirv-viewer](https://github.com/daiyousei-qz/spirv-viewer)  
-[vscode-spvasm](https://github.com/PENGUINLIONG/vscode-spvasm)
+[vscode-spvasm](https://github.com/PENGUINLIONG/vscode-spvasm)  
+Github Copilot has been used in developing the vscode frontend plugin.
