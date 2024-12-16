@@ -50,6 +50,17 @@ The Khronos group has implemented
 
 It is worth noting that `spirv-as` and `spirv-val` short-circuits on detecting the first error. So directly writing a frontend LSP that uses the existing C APIs, provides only limited results.
 
+<figure>
+  <img
+  src="images/spirv_val_output_vanilla.png"
+  alt="The beautiful MDN logo.">
+  <figcaption>
+      <h4 align="center">
+      Short-Circuited Output From spirv-val
+      </h4>
+  </figcaption>
+</figure>
+
 ### Third-Party & Community Tooling
 
 [spirv-viewer](https://github.com/daiyousei-qz/spirv-viewer) is a vscode plugin that provides basic syntax highlighting, definition, and documentation on hover. However, it does not perform syntax & semantic checking.  
