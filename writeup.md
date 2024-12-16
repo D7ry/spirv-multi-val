@@ -61,12 +61,19 @@ It is worth noting that `spirv-as` and `spirv-val` short-circuits on detecting t
 Given the challenges to writing SPIR-V and the status quo of tooling, we seek to implement the following:
 
 1. Expand the `spirv-val` tool to allow for exhaustive error checking, instead of short-circuiting behavior.
-2. Integrate the exhaustive error checking in `spirv-val` into a new C API, that interops with arbitrary lsp frontends.
+2. Integrate the exhaustive error checking in `spirv-val` into a lsp frontend, for quick hinting to the programmers of the syntactic & semantic errors.
 
 The new features introduced should greatly improve SPIR-V tooling in terms of convenience it provides to the programmers.
 
 ## Implementation
 
+### Refactoring Diagnostic Struct
+
+`spirv-val` and `spirv-val` use `spv_diagnostic_t` struct to store a single diagnostic -- including line numbers and detailed text message. All functions revolving streaming, dumping, and printing diagnostics revolve around this struct -- with 900+ references. Therefore it is less practical to vectorize the struct. Instead we add a pointer field that points to a potential next `spv_diagnostic_t` struct, making the struct a linked list. Such an implementation is minimally intrusive. 
+
+We then proceed to modify `spvDiagnosticCreate()`, `spvDiagnosticDestroy()`, and `spvDiagnosticPrint()` to account for the linked list structure.
+
+### Refactoring Message Consumer Pattern
 
 
 
