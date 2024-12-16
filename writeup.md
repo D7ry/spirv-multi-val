@@ -67,14 +67,44 @@ The new features introduced should greatly improve SPIR-V tooling in terms of co
 
 ## Implementation
 
-### Refactoring Diagnostic Struct
+### Diagnostic Struct
 
 `spirv-val` and `spirv-val` use `spv_diagnostic_t` struct to store a single diagnostic -- including line numbers and detailed text message. All functions revolving streaming, dumping, and printing diagnostics revolve around this struct -- with 900+ references. Therefore it is less practical to vectorize the struct. Instead we add a pointer field that points to a potential next `spv_diagnostic_t` struct, making the struct a linked list. Such an implementation is minimally intrusive. 
 
 We then proceed to modify `spvDiagnosticCreate()`, `spvDiagnosticDestroy()`, and `spvDiagnosticPrint()` to account for the linked list structure.
 
-### Refactoring Message Consumer Pattern
+### Message Consumer Pattern
 
+Modifying the actual validator code poses some challenges: instead of directly writing to the diagnostics object, the validator creates `DiagnosticStream` object -- an RAII
+helper for flushing diagnostics into a consumer through its destructor. 
+The consumer is a lamdba function specified by the caller of the validator -- in our case it is a lambda that simply flushes to
+`stdout`:
+
+```cpp
+auto create_diagnostic = [diagnostic](spv_message_level_t, const char*,
+                                      const spv_position_t& position,
+                                      const char* message) {
+  auto p = position;
+  spvDiagnosticDestroy(*diagnostic);  // Avoid memory leak.
+  *diagnostic = spvDiagnosticCreate(&p, message);
+};
+```
+We modify the lambda to, instead of freeing the existing diagnostics, append to the refactored data structure:
+
+```cpp
+auto create_diagnostic = [diagnostic](spv_message_level_t, const char*,
+                                   const spv_position_t& position,
+                                   const char* message) {
+  auto p = position;
+  if (!*diagnostic) {
+    *diagnostic = spvDiagnosticCreate(&p, message);
+  } else {
+    spvDiagnosticAppend(*diagnostic, &p, message);
+  }
+};
+```
+
+### Multi Diagnostics Validator
 
 
 ## Evaluation
