@@ -19,6 +19,17 @@ We extended the existing SPIR-V language tooling to allow for exhaustively check
 
 [`SPIR-V`](https://www.khronos.org/spir/) is an intermediate language targeting graphics and parallel computing. It is primarily used in the Vulkan graphics API and OpenCL. Originally developed as a dialect of LLVM IR, SPIR-V has evolved into its own specification over the years.
 
+<figure>
+  <img
+  src="images/spv_example.png"
+  alt="The beautiful MDN logo.">
+  <figcaption>
+      <h4 align="center">
+      Example SPIR-V Program
+      </h4>
+  </figcaption>
+</figure>
+
 SPIR-V streamlines heterogeneous computing by allowing developers to use any language of their choice that compiles into SPIR-V, which is then lowered into vendor-specific implementations. This process eliminates the need for proprietary implementations of high-level graphics and compute compilers.
 
 ### SPIR-V Official Tooling
